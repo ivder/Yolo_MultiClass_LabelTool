@@ -1,0 +1,4 @@
+pothole
+spalling
+spallingcross
+patchdamaged
