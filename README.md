@@ -43,4 +43,9 @@ PIL-1.1.7.win32-py2.7
   - The labeling result will be saved in **Labels/1/..** if and only if the 'Next' button is clicked.
 6. run `python convert.py` to convert the labeling result to YOLO format. The result will be saved in **Labels/Output/..**
    
+**Output**
+
 ![ss](https://github.com/gameon67/Yolo_MultiClass_LabelTool/blob/master/Capture.JPG)
+
+    1 0.498958333333 0.915740740741 0.0875 0.0907407407407
+    3 0.361979166667 0.930555555556 0.0739583333333 0.0944444444444
