@@ -1,7 +1,7 @@
 My own version of labeling tool for YOLO format (support Multi Class labeling on the same image)
 
 Main Program forked from [puzzledqs/BBox-Label-Tool](https://github.com/puzzledqs/BBox-Label-Tool/tree/multi-class)<br>
-Converting to Yolo format forked from [ManivannanMurugavel/YOLO-Annotation-Tool] (https://github.com/ManivannanMurugavel/YOLO-Annotation-Tool)<br>
+Converter to Yolo format forked from [ManivannanMurugavel/YOLO-Annotation-Tool] (https://github.com/ManivannanMurugavel/YOLO-Annotation-Tool)<br>
 **Changed 001 as a project name instead of class name**
 
 ## Feature
