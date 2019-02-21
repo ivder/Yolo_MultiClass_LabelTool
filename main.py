@@ -97,7 +97,7 @@ class LabelTool():
         self.lb1.grid(row = 3, column = 2,  sticky = W+N)
         self.listbox = Listbox(self.frame, width = 22, height = 12)
         self.listbox.grid(row = 4, column = 2, sticky = N+S)
-        self.btnDel = Button(self.frame, text = 'Delete', command = self.delBBox)
+        self.btnDel = Button(self.frame, text = 'Clear', command = self.delBBox)
         self.btnDel.grid(row = 5, column = 2, sticky = W+E+N)
         self.btnClear = Button(self.frame, text = 'ClearAll', command = self.clearBBox)
         self.btnClear.grid(row = 6, column = 2, sticky = W+E+N)
@@ -107,6 +107,8 @@ class LabelTool():
         self.ctrPanel.grid(row = 7, column = 1, columnspan = 2, sticky = W+E)
         self.prevBtn = Button(self.ctrPanel, text='<< Prev', width = 10, command = self.prevImage)
         self.prevBtn.pack(side = LEFT, padx = 5, pady = 3)
+        self.delBtn = Button(self.ctrPanel, text ='Delete', width = 10, command = self.delImage)
+        self.delBtn.pack(side = LEFT, padx = 5, pady = 3)
         self.nextBtn = Button(self.ctrPanel, text='Next >>', width = 10, command = self.nextImage)
         self.nextBtn.pack(side = LEFT, padx = 5, pady = 3)
         self.progLabel = Label(self.ctrPanel, text = "Progress:     /    ")
@@ -178,7 +180,7 @@ class LabelTool():
         filelist = glob.glob(os.path.join(self.egDir, '*.JPG'))
         self.tmp = []
         self.egList = []
-        random.shuffle(filelist)
+        #random.shuffle(filelist)
         for (i, f) in enumerate(filelist):
             if i == 3:
                 break
@@ -297,6 +299,13 @@ class LabelTool():
 
     def nextImage(self, event = None):
         self.saveImage()
+        if self.cur < self.total:
+            self.cur += 1
+            self.loadImage()
+            
+    def delImage(self, event = None):
+        os.remove(self.imageList[self.cur - 1])
+        print self.imageList[self.cur - 1]+" is deleted."
         if self.cur < self.total:
             self.cur += 1
             self.loadImage()
