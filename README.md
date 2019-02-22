@@ -7,6 +7,7 @@ Converter to Yolo format forked from [ManivannanMurugavel/YOLO-Annotation-Tool] 
 ## Feature
 1. Multi-class support 
 2. Support '.JPG' format
+3. Delete button to remove unwanted image for dataset
 
 Data Organization
 -----------------
@@ -14,11 +15,11 @@ LabelTool
 |  
 |--main.py   *# source code for the tool*  
 |  
-|--Images/   *# direcotry containing the images to be labeled*  
-   |--1/     *# project name  
+|--Images/   *# direcotry containing the images to be labeled* 
+|  |--1/     *# project name  
 |--Labels/   *# direcotry for the labeling results*  
-   |--1/     *# result txt according to project name
-   |--output/*# converted to YOLO format
+|  |--1/     *# result txt according to project name
+|  |--output/*# converted to YOLO format
 |--Examples/  *# direcotry for the example bboxes* 
 
 BBox-Label-Tool
