@@ -9,7 +9,7 @@ Converter to Yolo format forked from [ManivannanMurugavel/YOLO-Annotation-Tool] 
 2. Support '.JPG' format
 
 ## Additional Feature
-1. Delete button to remove unwanted image for dataset
+1. Skip button to skip labeling on unwanted image
 2. Add Save and Load Checkpoint
 3. Remove class confirm button (set value directly from combobox)
 
@@ -47,7 +47,7 @@ PIL-1.1.7.win32-py2.7
 5. After finishing one image, click `Next` to advance. Likewise, click `Prev` to reverse. Or, input the index and click `Go` to navigate to an arbitrary image.
    - The labeling result will be saved in **Labels/1/..** if and only if the 'Next' button is clicked.
    - **Checkpoint of last Image filepath will be saved when 'Next' button is clicked.**
-6. Click `Delete` if you want to delete unwanted image from directory and skip the annotation for that image
+6. Click `Skip` if you want to skip unwanted image from directory and skip the annotation for that image (skipped image path will be saved in log/skip.txt)
 7. run `python convert.py` to convert the labeling result to YOLO format. The result will be saved in **Labels/Output/..**
    
 **Output**
