@@ -1,11 +1,3 @@
-#-------------------------------------------------------------------------------
-# Name:        Object bounding box label tool
-# Purpose:     Label object bboxes for ImageNet Detection data
-# Author:      Qiushi
-# Created:     06/06/2014
-
-#
-#-------------------------------------------------------------------------------
 from __future__ import division
 from Tkinter import *
 import tkMessageBox
@@ -89,8 +81,9 @@ class LabelTool():
         self.classcandidate['values'] = self.cla_can_temp
         self.classcandidate.current(0)
         self.currentLabelclass = self.classcandidate.get() #init
-        self.btnclass = Button(self.frame, text = 'ComfirmClass', command = self.setClass)
-        self.btnclass.grid(row=2,column=2,sticky = W+E)
+        self.classcandidate.bind('<<ComboboxSelected>>', self.setClass)
+        #self.btnclass = Button(self.frame, text = 'ComfirmClass', command = self.setClass)
+        #self.btnclass.grid(row=2,column=2,sticky = W+E)
 
         # showing bbox info & delete bbox
         self.lb1 = Label(self.frame, text = 'Bounding boxes:')
@@ -105,10 +98,14 @@ class LabelTool():
         # control panel for image navigation
         self.ctrPanel = Frame(self.frame)
         self.ctrPanel.grid(row = 7, column = 1, columnspan = 2, sticky = W+E)
+        self.resetChkBtn = Button(self.ctrPanel, text='ResetCheckpoint', width = 15, command = self.resetCheckpoint)
+        self.resetChkBtn.pack(side = LEFT, padx = 5, pady = 3)
+        self.loadChkBtn = Button(self.ctrPanel, text='LoadCheckpoint', width = 15, command = self.loadCheckpoint) 
+        self.loadChkBtn.pack(side = LEFT, padx = 5, pady = 3)
         self.prevBtn = Button(self.ctrPanel, text='<< Prev', width = 10, command = self.prevImage)
         self.prevBtn.pack(side = LEFT, padx = 5, pady = 3)
-        self.delBtn = Button(self.ctrPanel, text ='Delete', width = 10, command = self.delImage)
-        self.delBtn.pack(side = LEFT, padx = 5, pady = 3)
+        self.skipBtn = Button(self.ctrPanel, text ='Skip', width = 10, command = self.skipImage)
+        self.skipBtn.pack(side = LEFT, padx = 5, pady = 3)
         self.nextBtn = Button(self.ctrPanel, text='Next >>', width = 10, command = self.nextImage)
         self.nextBtn.pack(side = LEFT, padx = 5, pady = 3)
         self.progLabel = Label(self.ctrPanel, text = "Progress:     /    ")
@@ -124,7 +121,7 @@ class LabelTool():
         # example pannel for illustration
         self.egPanel = Frame(self.frame, border = 10)
         self.egPanel.grid(row = 1, column = 0, rowspan = 5, sticky = N)
-        self.tmpLabel2 = Label(self.egPanel, text = "Examples:")
+        self.tmpLabel2 = Label(self.egPanel, text = "Image :")
         self.tmpLabel2.pack(side = TOP, pady = 5)
         self.egLabels = []
         for i in range(3):
@@ -173,7 +170,7 @@ class LabelTool():
 
         # load example bboxes
         #self.egDir = os.path.join(r'./Examples', '%03d' %(self.category))
-        self.egDir = os.path.join(r'./Examples/demo')
+        '''self.egDir = os.path.join(r'./Examples/demo')
         print os.path.exists(self.egDir)
         if not os.path.exists(self.egDir):
             return
@@ -189,7 +186,7 @@ class LabelTool():
             new_size = int(r * im.size[0]), int(r * im.size[1])
             self.tmp.append(im.resize(new_size, Image.ANTIALIAS))
             self.egList.append(ImageTk.PhotoImage(self.tmp[-1]))
-            self.egLabels[i].config(image = self.egList[-1], width = SIZE[0], height = SIZE[1])
+            self.egLabels[i].config(image = self.egList[-1], width = SIZE[0], height = SIZE[1])'''
 
         self.loadImage()
         print '%d images loaded from %s' %(self.total, s)
@@ -290,6 +287,18 @@ class LabelTool():
         self.listbox.delete(0, len(self.bboxList))
         self.bboxIdList = []
         self.bboxList = []
+        
+    def loadCheckpoint(self, event = None):
+        checkpoint = 0
+        with open("log/checkpoint.txt","r") as checkpointFile:
+            checkpoint = checkpointFile.read()
+        if 1 <= int(checkpoint) and int(checkpoint) <= self.total:
+            self.cur = int(checkpoint)
+            self.loadImage()
+    
+    def resetCheckpoint(self, event = None):
+        with open("log/checkpoint.txt","w") as checkpointFile:
+            checkpointFile.write("1")
 
     def prevImage(self, event = None):
         self.saveImage()
@@ -302,10 +311,15 @@ class LabelTool():
         if self.cur < self.total:
             self.cur += 1
             self.loadImage()
+        with open("log/checkpoint.txt","w") as checkpointFile:
+            checkpointFile.write("{}".format(self.cur))
+            print "Current image : "+self.imageList[self.cur-1]
             
-    def delImage(self, event = None):
-        os.remove(self.imageList[self.cur - 1])
-        print self.imageList[self.cur - 1]+" is deleted."
+    def skipImage(self, event = None):
+        #os.remove(self.imageList[self.cur - 1])
+        print self.imageList[self.cur - 1]+" is skipped."
+        with open("log/skipped.txt",'a') as skippedFile:
+            skippedFile.write("{}\n".format(self.imageList[self.cur - 1]))
         if self.cur < self.total:
             self.cur += 1
             self.loadImage()
@@ -317,7 +331,7 @@ class LabelTool():
             self.cur = idx
             self.loadImage()
 
-    def setClass(self):
+    def setClass(self, event):
     	self.currentLabelclass = self.classcandidate.get()
     	print 'set label class to :',self.currentLabelclass
 
