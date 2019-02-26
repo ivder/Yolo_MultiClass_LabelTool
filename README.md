@@ -7,7 +7,11 @@ Converter to Yolo format forked from [ManivannanMurugavel/YOLO-Annotation-Tool] 
 ## Feature
 1. Multi-class support 
 2. Support '.JPG' format
-3. Delete button to remove unwanted image for dataset
+
+## Additional Feature
+1. Delete button to remove unwanted image for dataset
+2. Add Save and Load Checkpoint
+3. Remove class confirm button (set value directly from combobox)
 
 Data Organization
 -----------------
@@ -42,12 +46,13 @@ PIL-1.1.7.win32-py2.7
   - To delete all existing bounding boxes in the image, simply click `ClearAll`.
 5. After finishing one image, click `Next` to advance. Likewise, click `Prev` to reverse. Or, input the index and click `Go` to navigate to an arbitrary image.
    - The labeling result will be saved in **Labels/1/..** if and only if the 'Next' button is clicked.
+   - **Checkpoint of last Image filepath will be saved when 'Next' button is clicked.**
 6. Click `Delete` if you want to delete unwanted image from directory and skip the annotation for that image
 7. run `python convert.py` to convert the labeling result to YOLO format. The result will be saved in **Labels/Output/..**
    
 **Output**
 
-![ss](https://github.com/gameon67/Yolo_MultiClass_LabelTool/blob/master/Capture.JPG)
+![Example](https://github.com/gameon67/Yolo_MultiClass_LabelTool/blob/master/Examples/demo/Capture.JPG)
 
     1 0.498958333333 0.915740740741 0.0875 0.0907407407407
     3 0.361979166667 0.930555555556 0.0739583333333 0.0944444444444
