@@ -18,12 +18,11 @@ Data Organization
 LabelTool  
 |  
 |--main.py   *# source code for the tool*  
-|  
 |--Images/   *# direcotry containing the images to be labeled* 
-|  |--1/     *# project name  
+&nbsp;    |--1/     *# project name  
 |--Labels/   *# direcotry for the labeling results*  
-|  |--1/     *# result txt according to project name
-|  |--output/*# converted to YOLO format
+&nbsp;&nbsp;&nbsp;|--1/     *# result txt according to project name <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--output/*# converted to YOLO format<br>
 |--Examples/  *# direcotry for the example bboxes* 
 
 BBox-Label-Tool
@@ -37,7 +36,7 @@ python 2.7 win 32bit
 PIL-1.1.7.win32-py2.7
 
 ## Usage
-1. For multi-class task, modify 'class.txt' with your own class-candidates and before labeling bbox, choose the 'Current Class' in the Combobox and make sure you click `ComfirmClass` button.
+1. For multi-class task, modify 'class.txt' with your own class-candidates and before labeling bbox, choose the 'Current Class' in the Combobox.
 2. run `python main.py` 
 3. Input a number according to project name (e.g, 1, 2, 5...), and click `Load`. The images along with a few example results will be loaded.
 4. To create a new bounding box, left-click to select the first vertex. Moving the mouse to draw a rectangle, and left-click again to select the second vertex.
