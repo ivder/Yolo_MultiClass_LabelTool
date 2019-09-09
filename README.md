@@ -17,13 +17,13 @@ Data Organization
 -----------------
 LabelTool  
 |  
-|--main.py   *# source code for the tool*  
-|--Images/   *# direcotry containing the images to be labeled* 
-&nbsp;    |--1/     *# project name  
-|--Labels/   *# direcotry for the labeling results*  
-&nbsp;&nbsp;&nbsp;|--1/     *# result txt according to project name <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--output/*# converted to YOLO format<br>
-|--Examples/  *# direcotry for the example bboxes* 
+|--main.py                    *# source code for the tool*  
+|--Images/                    *# direcotry containing the images to be labeled* <br>
+&nbsp;&nbsp;&nbsp;|--1/               *# project name*  
+|--Labels/                    *# direcotry for the labeling results*  
+&nbsp;&nbsp;&nbsp;|--1/       *# result txt according to project name* <br>
+&nbsp;&nbsp;&nbsp;|--output/  *# converted to YOLO format*<br>
+|--Examples/                  *# direcotry for the example bboxes* 
 
 BBox-Label-Tool
 ===============
@@ -45,7 +45,7 @@ PIL-1.1.7.win32-py2.7
   - To delete all existing bounding boxes in the image, simply click `ClearAll`.
 5. After finishing one image, click `Next` to advance. Likewise, click `Prev` to reverse. Or, input the index and click `Go` to navigate to an arbitrary image.
    - The labeling result will be saved in **Labels/1/..** if and only if the 'Next' button is clicked.
-   - **Checkpoint of last Image filepath will be saved when 'Next' button is clicked.**
+   - **Checkpoint of last Image Number will be saved when 'Next' button is clicked.**
 6. Click `Skip` if you want to skip unwanted image from directory and skip the annotation for that image (skipped image path will be saved in log/skip.txt)
 7. run `python convert.py` to convert the labeling result to YOLO format. The result will be saved in **Labels/Output/..**
    
