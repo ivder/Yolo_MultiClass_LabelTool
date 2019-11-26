@@ -2,16 +2,18 @@ My own version of labeling tool for YOLO format (support Multi Class labeling on
 
 Main Program forked from [puzzledqs/BBox-Label-Tool](https://github.com/puzzledqs/BBox-Label-Tool/tree/multi-class)<br>
 Converter to Yolo format forked from [ManivannanMurugavel/YOLO-Annotation-Tool] (https://github.com/ManivannanMurugavel/YOLO-Annotation-Tool)<br>
-**Changed 001 as a project name instead of class name**
 
 ## Feature
 1. Multi-class support 
 2. Support '.JPG' format
+3. Built in YOLO format converter
 
 ## Additional Feature
 1. Skip button to skip labeling on unwanted image
 2. Add Save and Load Checkpoint
 3. Remove class confirm button (set value directly from combobox)
+4. Add Convert to YOLO format button (no need to run external program)
+5. Load image using directory browser instead of user input
 
 Data Organization
 -----------------
@@ -24,7 +26,7 @@ LabelTool
 &nbsp;&nbsp;&nbsp;|--Sample/       *# result txt according to project name* <br>
 |--Result_YOLO/               *# converted to YOLO format*<br>
 
-BBox-Label-Tool
+Yolo Annotator
 ===============
 
 A simple tool for labeling object bounding boxes in images, implemented with Python Tkinter. 
