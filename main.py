@@ -1,11 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from __future__ import division
 from Tkinter import *
-import tkMessageBox
+import tkMessageBox, tkFileDialog
 from PIL import Image, ImageTk
 import ttk
 import os
 import glob
 import random
+import xml.etree.ElementTree as ET
+import io
+import convert
 
 # colors for the bboxes
 COLORS = ['red', 'blue', 'olive', 'teal', 'cyan', 'green', 'black']
@@ -16,7 +22,7 @@ class LabelTool():
     def __init__(self, master):
         # set up the main frame
         self.parent = master
-        self.parent.title("LabelTool")
+        self.parent.title("Yolo Annotator")
         self.frame = Frame(self.parent)
         self.frame.pack(fill=BOTH, expand=1)
         self.parent.resizable(width = FALSE, height = FALSE)
@@ -27,15 +33,17 @@ class LabelTool():
         self.egDir = ''
         self.egList = []
         self.outDir = ''
+        self.xmlOutDir =''
         self.cur = 0
         self.total = 0
-        self.category = 0
+        self.category = ''
         self.imagename = ''
         self.labelfilename = ''
         self.tkimg = None
         self.currentLabelclass = ''
         self.cla_can_temp = []
         self.classcandidate_filename = 'class.txt'
+        self.classcnt = 0
 
         # initialize mouse state
         self.STATE = {}
@@ -51,12 +59,14 @@ class LabelTool():
 
         # ----------------- GUI stuff ---------------------
         # dir entry & load
-        self.label = Label(self.frame, text = "Image Dir:")
-        self.label.grid(row = 0, column = 0, sticky = E)
-        self.entry = Entry(self.frame)
-        self.entry.grid(row = 0, column = 1, sticky = W+E)
-        self.ldBtn = Button(self.frame, text = "Load", command = self.loadDir)
-        self.ldBtn.grid(row = 0, column = 2,sticky = W+E)
+        #self.label = Label(self.frame, text = "Image Dir:")
+        #self.label.grid(row = 0, column = 0, sticky = E)
+        #self.entry = Entry(self.frame)
+        #self.entry.grid(row = 0, column = 1, sticky = W+E)
+        self.ldProjBtn = Button(self.frame, text = "Load Image", command = self.loadDir)
+        self.ldProjBtn.grid(row = 0, column = 0,sticky = W+E, padx=5)
+        #self.ldImgBtn = Button(self.frame, text = "Load XML", command = self.loadXML)
+        #self.ldImgBtn.grid(row = 0, column = 1,sticky = W, padx=5)
 
         # main panel for labeling
         self.mainPanel = Canvas(self.frame, cursor='tcross')
@@ -66,20 +76,26 @@ class LabelTool():
         self.parent.bind("s", self.cancelBBox)
         self.parent.bind("a", self.prevImage) # press 'a' to go backforward
         self.parent.bind("d", self.nextImage) # press 'd' to go forward
-        self.mainPanel.grid(row = 1, column = 1, rowspan = 4, sticky = W+N)
+        self.parent.bind("r", self.clearBBoxShortcut)
+        self.mainPanel.grid(row = 1, column = 1, columnspan = 3, rowspan = 4, sticky = W+N)
 
         # choose class
         self.classname = StringVar()
         self.classcandidate = ttk.Combobox(self.frame,state='readonly',textvariable=self.classname)
-        self.classcandidate.grid(row=1,column=2)
+        self.classcandidate.grid(row=1,column=4)
         if os.path.exists(self.classcandidate_filename):
         	with open(self.classcandidate_filename) as cf:
         		for line in cf.readlines():
         			# print line
         			self.cla_can_temp.append(line.strip('\n'))
-        #print self.cla_can_temp
+        			self.classcnt +=1
+
         self.classcandidate['values'] = self.cla_can_temp
         self.classcandidate.current(0)
+        self.parent.bind('<Key>', self.setClassShortcut)
+        #self.parent.bind("1", lambda e: self.setClassShortcut(0))
+        #self.parent.bind("2", lambda e: self.setClassShortcut(1))
+        #2self.parent.bind("3", lambda e: self.setClassShortcut(2))
         self.currentLabelclass = self.classcandidate.get() #init
         self.classcandidate.bind('<<ComboboxSelected>>', self.setClass)
         #self.btnclass = Button(self.frame, text = 'ComfirmClass', command = self.setClass)
@@ -87,17 +103,19 @@ class LabelTool():
 
         # showing bbox info & delete bbox
         self.lb1 = Label(self.frame, text = 'Bounding boxes:')
-        self.lb1.grid(row = 3, column = 2,  sticky = W+N)
+        self.lb1.grid(row = 3, column = 4,  sticky = W+N)
         self.listbox = Listbox(self.frame, width = 22, height = 12)
-        self.listbox.grid(row = 4, column = 2, sticky = N+S)
+        self.listbox.grid(row = 4, column = 4, sticky = N+S)
         self.btnDel = Button(self.frame, text = 'Clear', command = self.delBBox)
-        self.btnDel.grid(row = 5, column = 2, sticky = W+E+N)
+        self.btnDel.grid(row = 5, column = 4, sticky = W+E+N)
         self.btnClear = Button(self.frame, text = 'ClearAll', command = self.clearBBox)
-        self.btnClear.grid(row = 6, column = 2, sticky = W+E+N)
+        self.btnClear.grid(row = 6, column = 4, sticky = W+E+N)
 
         # control panel for image navigation
         self.ctrPanel = Frame(self.frame)
-        self.ctrPanel.grid(row = 7, column = 1, columnspan = 2, sticky = W+E)
+        self.ctrPanel.grid(row = 7, column = 1, columnspan = 4, sticky = W+E)
+        self.conv2YoloBtn = Button(self.ctrPanel, text='Convert YOLO', width = 15, command = self.convert2Yolo)
+        self.conv2YoloBtn.pack(side = LEFT, padx = 5, pady = 3)
         self.resetChkBtn = Button(self.ctrPanel, text='ResetCheckpoint', width = 15, command = self.resetCheckpoint)
         self.resetChkBtn.pack(side = LEFT, padx = 5, pady = 3)
         self.loadChkBtn = Button(self.ctrPanel, text='LoadCheckpoint', width = 15, command = self.loadCheckpoint) 
@@ -121,8 +139,10 @@ class LabelTool():
         # example pannel for illustration
         self.egPanel = Frame(self.frame, border = 10)
         self.egPanel.grid(row = 1, column = 0, rowspan = 5, sticky = N)
-        self.tmpLabel2 = Label(self.egPanel, text = "Image :")
-        self.tmpLabel2.pack(side = TOP, pady = 5)
+        self.tmpLabel2 = Label(self.egPanel, text = "Key Shortcut :\na : Prev\nd : Next\ns : Cancel\nr : Delete BB\n1-9 : Select Class")
+        self.tmpLabel2.pack(side = TOP)
+        self.tmpLabel3 = Label(self.egPanel, text = "\nBasic Usage :\n1.Load Image\n2.Annotate\n3.Convert Yolo")
+        self.tmpLabel3.pack(side = TOP)
         self.egLabels = []
         for i in range(3):
             self.egLabels.append(Label(self.egPanel))
@@ -141,55 +161,40 @@ class LabelTool():
 
     def loadDir(self, dbg = False):
         if not dbg:
-            s = self.entry.get()
+            #s = self.entry.get()
             self.parent.focus()
-            self.category = int(s)
+            #self.category = int(s)
+            s = str(tkFileDialog.askdirectory(initialdir=os.getcwd())).split('/')[-1]
+            self.category = s
         else:
             s = r'D:\workspace\python\labelGUI'
 ##        if not os.path.isdir(s):
 ##            tkMessageBox.showerror("Error!", message = "The specified dir doesn't exist!")
 ##            return
-        # get image list
-        self.imageDir = os.path.join(r'./Images', '%d' %(self.category))
+
+         # get image list
+        self.imageDir = os.path.join(r'./Images', '%s' %(self.category))
         #print self.imageDir 
         #print self.category
         self.imageList = glob.glob(os.path.join(self.imageDir, '*.JPG'))
         #print self.imageList
         if len(self.imageList) == 0:
+            tkMessageBox.showinfo("Error", "No .JPG images found in the specified dir!")
             print 'No .JPG images found in the specified dir!'
             return
 
         # default to the 1st image in the collection
         self.cur = 1
         self.total = len(self.imageList)
-
+        
          # set up output dir
-        self.outDir = os.path.join(r'./Labels', '%d' %(self.category))
+        self.outDir = os.path.join(r'./Result', '%s' %(self.category))
         if not os.path.exists(self.outDir):
             os.mkdir(self.outDir)
-
-        # load example bboxes
-        #self.egDir = os.path.join(r'./Examples', '%03d' %(self.category))
-        '''self.egDir = os.path.join(r'./Examples/demo')
-        print os.path.exists(self.egDir)
-        if not os.path.exists(self.egDir):
-            return
-        filelist = glob.glob(os.path.join(self.egDir, '*.JPG'))
-        self.tmp = []
-        self.egList = []
-        #random.shuffle(filelist)
-        for (i, f) in enumerate(filelist):
-            if i == 3:
-                break
-            im = Image.open(f)
-            r = min(SIZE[0] / im.size[0], SIZE[1] / im.size[1])
-            new_size = int(r * im.size[0]), int(r * im.size[1])
-            self.tmp.append(im.resize(new_size, Image.ANTIALIAS))
-            self.egList.append(ImageTk.PhotoImage(self.tmp[-1]))
-            self.egLabels[i].config(image = self.egList[-1], width = SIZE[0], height = SIZE[1])'''
-
+        
         self.loadImage()
-        print '%d images loaded from %s' %(self.total, s)
+        print '%d images loaded from %s' %(self.total, self.category)
+        tkMessageBox.showinfo("Info", "%d images loaded from %s" %(self.total, self.category))
 
     def loadImage(self):
         # load image
@@ -206,25 +211,9 @@ class LabelTool():
         labelname = self.imagename + '.txt'
         self.labelfilename = os.path.join(self.outDir, labelname)
         bbox_cnt = 0
-        if os.path.exists(self.labelfilename):
-            with open(self.labelfilename) as f:
-                for (i, line) in enumerate(f):
-                    if i == 0:
-                        bbox_cnt = int(line.strip())
-                        continue
-                    # tmp = [int(t.strip()) for t in line.split()]
-                    tmp = line.split()
-                    #print tmp
-                    self.bboxList.append(tuple(tmp))
-                    tmpId = self.mainPanel.create_rectangle(int(tmp[0]), int(tmp[1]), \
-                                                            int(tmp[2]), int(tmp[3]), \
-                                                            width = 2, \
-                                                            outline = COLORS[(len(self.bboxList)-1) % len(COLORS)])
-                    # print tmpId
-                    self.bboxIdList.append(tmpId)
-                    self.listbox.insert(END, '%s : (%d, %d) -> (%d, %d)' %(tmp[4],int(tmp[0]), int(tmp[1]), \
-                    												  int(tmp[2]), int(tmp[3])))
-                    self.listbox.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[(len(self.bboxIdList) - 1) % len(COLORS)])
+        
+        self.loadBBox()
+                    
 
     def saveImage(self):
         with open(self.labelfilename, 'w') as f:
@@ -287,7 +276,77 @@ class LabelTool():
         self.listbox.delete(0, len(self.bboxList))
         self.bboxIdList = []
         self.bboxList = []
+    
+    def clearBBoxShortcut(self, event):
+        for idx in range(len(self.bboxIdList)):
+            self.mainPanel.delete(self.bboxIdList[idx])
+        self.listbox.delete(0, len(self.bboxList))
+        self.bboxIdList = []
+        self.bboxList = []
         
+    '''def loadXML(self, event = None):
+        if (self.category == ''):
+            tkMessageBox.showinfo("Error", "Please Load Image first")
+        else:
+            basePath = "C:/DeepEye/Data/Result/request"
+            xmlFiles = os.listdir(basePath)
+            for xml in xmlFiles:
+                if not(os.path.isfile(self.imageDir+'/'+xml.split('.xml.req')[0]+'_C.jpg')):
+                    continue
+                
+                fullPath = os.path.join(basePath, xml)
+                if os.path.isfile(fullPath):
+                    f = io.open(fullPath,'r', encoding = 'euc-kr')
+                    text = f.read().encode('utf-8')
+                    f.close()
+                    root = ET.fromstring(text)
+
+                    for detect in root.findall('./Detections/detect'):
+                        xmin = int(detect.find('rectx').text)
+                        ymin = int(detect.find('recty').text)
+                        xmax = int(detect.find('rectx').text) + int(detect.find('rectw').text)
+                        ymax = int(detect.find('recty').text) + int(detect.find('recth').text)
+                        classCode = detect.find('class').text
+                        classLabel = ''
+                        if (classCode == '0'):
+                            classLabel = 'pothole'
+                        elif (classCode == '1'):
+                            classLabel = 'patchdamaged'
+                        elif (classCode == '2'):
+                            classLabel = 'spalling'
+                        
+                        saveName = xml.split('.xml.req')[0] + '_C.txt'
+                        savePath = os.path.join(self.outDir, saveName)
+                        with open(savePath, 'w') as f:
+                            f.write('1\n')
+                            f.write('%d %d %d %d %s' %(xmin,ymin,xmax,ymax,classLabel))
+                            
+            tkMessageBox.showinfo("Info", "XML parsing complete")
+            self.clearBBox()
+            self.loadBBox()'''
+                       
+                
+    def loadBBox(self):
+        if os.path.exists(self.labelfilename):
+            with open(self.labelfilename) as f:
+                for (i, line) in enumerate(f):
+                    if i == 0:
+                        bbox_cnt = int(line.strip())
+                        continue
+                    # tmp = [int(t.strip()) for t in line.split()]
+                    tmp = line.split()
+                    #print tmp
+                    self.bboxList.append(tuple(tmp))
+                    tmpId = self.mainPanel.create_rectangle(int(tmp[0]), int(tmp[1]), \
+                                                            int(tmp[2]), int(tmp[3]), \
+                                                            width = 2, \
+                                                            outline = COLORS[(len(self.bboxList)-1) % len(COLORS)])
+                    # print tmpId
+                    self.bboxIdList.append(tmpId)
+                    self.listbox.insert(END, '%s : (%d, %d) -> (%d, %d)' %(tmp[4],int(tmp[0]), int(tmp[1]), \
+                    												  int(tmp[2]), int(tmp[3])))
+                    self.listbox.itemconfig(len(self.bboxIdList) - 1, fg = COLORS[(len(self.bboxIdList) - 1) % len(COLORS)])
+    
     def loadCheckpoint(self, event = None):
         checkpoint = 0
         with open("log/checkpoint.txt","r") as checkpointFile:
@@ -332,8 +391,25 @@ class LabelTool():
             self.loadImage()
 
     def setClass(self, event):
-    	self.currentLabelclass = self.classcandidate.get()
-    	print 'set label class to :',self.currentLabelclass
+        self.currentLabelclass = self.classcandidate.get()
+        print 'set label class to :',self.currentLabelclass
+        
+    def setClassShortcut(self, event):
+        if (event.char.isdigit()):
+            idx = int(event.char) - 1
+            print idx
+            self.classcandidate.current(idx)
+            self.currentLabelclass = self.classcandidate.get()
+            print 'set label class to :',self.currentLabelclass
+        
+    def convert2Yolo(self, event = None):
+        if (self.category == ''):
+            tkMessageBox.showinfo("Error", "Please Annotate Image first")
+        else:
+            outpath = "./Result_YOLO/" + self.category +'/'
+            convert.Convert2Yolo(self.outDir+'/', outpath, self.category, self.cla_can_temp)
+            tkMessageBox.showinfo("Info", "YOLO data format conversion done")
+        
 
 ##    def setImage(self, imagepath = r'test2.png'):
 ##        self.img = Image.open(imagepath)
