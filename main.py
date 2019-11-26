@@ -65,8 +65,6 @@ class LabelTool():
         #self.entry.grid(row = 0, column = 1, sticky = W+E)
         self.ldProjBtn = Button(self.frame, text = "Load Image", command = self.loadDir)
         self.ldProjBtn.grid(row = 0, column = 0,sticky = W+E, padx=5)
-        #self.ldImgBtn = Button(self.frame, text = "Load XML", command = self.loadXML)
-        #self.ldImgBtn.grid(row = 0, column = 1,sticky = W, padx=5)
 
         # main panel for labeling
         self.mainPanel = Canvas(self.frame, cursor='tcross')
@@ -282,49 +280,7 @@ class LabelTool():
             self.mainPanel.delete(self.bboxIdList[idx])
         self.listbox.delete(0, len(self.bboxList))
         self.bboxIdList = []
-        self.bboxList = []
-        
-    '''def loadXML(self, event = None):
-        if (self.category == ''):
-            tkMessageBox.showinfo("Error", "Please Load Image first")
-        else:
-            basePath = "C:/DeepEye/Data/Result/request"
-            xmlFiles = os.listdir(basePath)
-            for xml in xmlFiles:
-                if not(os.path.isfile(self.imageDir+'/'+xml.split('.xml.req')[0]+'_C.jpg')):
-                    continue
-                
-                fullPath = os.path.join(basePath, xml)
-                if os.path.isfile(fullPath):
-                    f = io.open(fullPath,'r', encoding = 'euc-kr')
-                    text = f.read().encode('utf-8')
-                    f.close()
-                    root = ET.fromstring(text)
-
-                    for detect in root.findall('./Detections/detect'):
-                        xmin = int(detect.find('rectx').text)
-                        ymin = int(detect.find('recty').text)
-                        xmax = int(detect.find('rectx').text) + int(detect.find('rectw').text)
-                        ymax = int(detect.find('recty').text) + int(detect.find('recth').text)
-                        classCode = detect.find('class').text
-                        classLabel = ''
-                        if (classCode == '0'):
-                            classLabel = 'pothole'
-                        elif (classCode == '1'):
-                            classLabel = 'patchdamaged'
-                        elif (classCode == '2'):
-                            classLabel = 'spalling'
-                        
-                        saveName = xml.split('.xml.req')[0] + '_C.txt'
-                        savePath = os.path.join(self.outDir, saveName)
-                        with open(savePath, 'w') as f:
-                            f.write('1\n')
-                            f.write('%d %d %d %d %s' %(xmin,ymin,xmax,ymax,classLabel))
-                            
-            tkMessageBox.showinfo("Info", "XML parsing complete")
-            self.clearBBox()
-            self.loadBBox()'''
-                       
+        self.bboxList = []                               
                 
     def loadBBox(self):
         if os.path.exists(self.labelfilename):
