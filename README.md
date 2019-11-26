@@ -19,11 +19,10 @@ LabelTool
 |  
 |--main.py                    *# source code for the tool*  
 |--Images/                    *# direcotry containing the images to be labeled* <br>
-&nbsp;&nbsp;&nbsp;|--1/               *# project name*  
-|--Labels/                    *# direcotry for the labeling results*  
-&nbsp;&nbsp;&nbsp;|--1/       *# result txt according to project name* <br>
-&nbsp;&nbsp;&nbsp;|--output/  *# converted to YOLO format*<br>
-|--Examples/                  *# direcotry for the example bboxes* 
+&nbsp;&nbsp;&nbsp;|--Sample/               *# project/directory name*  
+|--Result/                    *# direcotry for the labeling results*  
+&nbsp;&nbsp;&nbsp;|--Sample/       *# result txt according to project name* <br>
+|--Result_YOLO/               *# converted to YOLO format*<br>
 
 BBox-Label-Tool
 ===============
@@ -36,22 +35,32 @@ python 2.7 win 32bit
 PIL-1.1.7.win32-py2.7
 
 ## Usage
-1. For multi-class task, modify 'class.txt' with your own class-candidates and before labeling bbox, choose the 'Current Class' in the Combobox.
+1. For multi-class task, modify 'class.txt' with your own class-candidates and before labeling bbox, choose the 'Current Class' in the Combobox or by pressing <kbd>1-9</kbd> on your keyboard.
 2. run `python main.py` 
-3. Input a number according to project name (e.g, 1, 2, 5...), and click `Load`. The images along with a few example results will be loaded.
+3. click `LoadImage`, select a folder that contains list of images.
 4. To create a new bounding box, left-click to select the first vertex. Moving the mouse to draw a rectangle, and left-click again to select the second vertex.
-  - To cancel the bounding box while drawing, just press <Esc>.
-  - To delete a existing bounding box, select it from the listbox, and click `Clear`.
+  - To cancel the bounding box while drawing, just press <kbd>Esc</kbd> or <kbd>s</kbd>.
+  - To delete a existing bounding box, select it from the listbox, and click `Clear` or <kbd>r</kbd>.
   - To delete all existing bounding boxes in the image, simply click `ClearAll`.
-5. After finishing one image, click `Next` to advance. Likewise, click `Prev` to reverse. Or, input the index and click `Go` to navigate to an arbitrary image.
-   - The labeling result will be saved in **Labels/1/..** if and only if the 'Next' button is clicked.
+5. After finishing one image, click `Next` or <kbd>d</kbd> to advance. Likewise, click `Prev` or <kbd>a</kbd> to reverse. Or, input the index and click `Go` to navigate to an arbitrary image.
+   - The labeling result will be saved in **Labels/[folder name]/..** if and only if the 'Next' button is clicked.
    - **Checkpoint of last Image Number will be saved when 'Next' button is clicked.**
 6. Click `Skip` if you want to skip unwanted image from directory and skip the annotation for that image (skipped image path will be saved in log/skip.txt)
-7. run `python convert.py` to convert the labeling result to YOLO format. The result will be saved in **Labels/Output/..**
+7. Click `ConvertYOLO` button or to convert the labeling result to YOLO format. The result will be saved in **Result_YOLO/[folder name]/..**
    
 **Output**
 
-![Example](https://github.com/gameon67/Yolo_MultiClass_LabelTool/blob/master/Examples/demo/Capture.JPG)
+![Example](https://github.com/gameon67/Yolo_MultiClass_LabelTool/blob/master/Examples/Capture.JPG)
 
-    1 0.4203125 0.613888888889 0.090625 0.0722222222222
-    3 0.730729166667 0.683333333333 0.0364583333333 0.162962962963
+Result (bbox coodrdinates):
+```
+2
+99 17 571 436 dog
+733 60 988 320 cat
+```
+Result_YOLO (yolo format) : 
+```
+0 0.279166666667 0.359523809524 0.393333333333 0.665079365079
+1 0.717083333333 0.301587301587 0.2125 0.412698412698
+```
+
