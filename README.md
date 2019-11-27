@@ -5,7 +5,7 @@ Converter to Yolo format forked from [ManivannanMurugavel/YOLO-Annotation-Tool] 
 
 ## Feature
 1. Multi-class support 
-2. Support '.JPG' format
+2. Support .jpg and .png format
 3. Built in YOLO format converter
 
 ## Additional Feature
