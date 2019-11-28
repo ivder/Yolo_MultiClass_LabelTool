@@ -3,6 +3,7 @@
 import os
 from os import walk, getcwd
 from PIL import Image
+import re
 
 
 def convert(size, box):
@@ -33,7 +34,6 @@ def Convert2Yolo(mypath, outpath, project, classes):
     """ Process """
     for txt_name in txt_name_list:
         # txt_file =  open("Labels/stop_sign/001.txt", "r")
-        
         """ Open input text files """
         txt_path = mypath + txt_name
         print("Input:" + txt_path)
@@ -43,7 +43,7 @@ def Convert2Yolo(mypath, outpath, project, classes):
         """ Open output text files """
         if not os.path.exists(outpath):
             os.mkdir(outpath)
-        txt_outpath = outpath + txt_name
+        txt_outpath = outpath + re.split('.jpg|.png',txt_name)[0] + '.txt'
         print("Output:" + txt_outpath)
         txt_outfile = open(txt_outpath, "w")
         
@@ -70,8 +70,8 @@ def Convert2Yolo(mypath, outpath, project, classes):
                     exit(0)
                 cls_id = classes.index(cls)
                 print(elems[0])
-                #
-                img_path = str('%s/Images/%s/%s.jpg'%(wd, project, os.path.splitext(txt_name)[0]))
+
+                img_path = str('%s/Images/%s/%s'%(wd, project, os.path.splitext(txt_name)[0]))
                 #t = magic.from_file(img_path)
                 #wh= re.search('(\d+) x (\d+)', t).groups()
                 im=Image.open(img_path)
@@ -93,7 +93,7 @@ def Convert2Yolo(mypath, outpath, project, classes):
         
         """ Save those images with bb into list"""
         if(ct != 0):
-            list_file.write('%s/images/%s/%s.jpg\n'%(wd, cls, os.path.splitext(txt_name)[0]))
+            list_file.write('%s/images/%s/%s\n'%(wd, cls, os.path.splitext(txt_name)[0]))
         else :
             os.remove(txt_outpath)
         
