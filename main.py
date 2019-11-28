@@ -12,6 +12,7 @@ import random
 import xml.etree.ElementTree as ET
 import io
 import convert
+import re
 
 # colors for the bboxes
 COLORS = ['red', 'blue', 'olive', 'teal', 'cyan', 'green', 'black']
@@ -209,7 +210,9 @@ class LabelTool():
 
         # load labels
         self.clearBBox()
-        self.imagename = os.path.split(imagepath)[-1].split('.jpg')[0]
+        self.imagename = os.path.split(imagepath)[-1]
+        #self.imagename = os.path.split(imagepath)[-1].split('.jpg')[0]
+        #self.imagename = re.split('.jpg|.png',os.path.split(imagepath)[-1])[0]
         labelname = self.imagename + '.txt'
         self.labelfilename = os.path.join(self.outDir, labelname)
         bbox_cnt = 0
